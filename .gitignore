@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+*.tsbuildinfo
+build-output.txt
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Prisma local DB
+*.db
+*.db-journal
+
+# Uploads (runtime data)
+uploads/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Fly.io
+.fly/

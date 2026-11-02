@@ -1,0 +1,17 @@
+node_modules
+dist
+.git
+.gitignore
+.env
+.env.*
+!.env.example
+uploads
+*.log
+*.md
+.vscode
+.idea
+.fly
+Dockerfile
+.dockerignore
+build-output.txt
+jest.config.js

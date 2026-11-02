@@ -1,0 +1,150 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model - handles showroom staff and admins only (customers don't need login)
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  phone     String
+  role      String   @default("SHOWROOM_STAFF") // SHOWROOM_STAFF, SHOWROOM_ADMIN, SUPER_ADMIN
+
+  // Relationships
+  showroomId String?
+  showroom   Showroom? @relation("StaffMember", fields: [showroomId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+// Showroom model - represents a car showroom
+model Showroom {
+  id        String   @id @default(cuid())
+  name      String
+  location  String
+  email     String   @unique
+  phone     String
+
+  // Relationships
+  cars      Car[]
+  staff     User[]   @relation("StaffMember")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("showrooms")
+}
+
+// Car model - represents a car available for sale or purchase
+model Car {
+  id        String   @id @default(cuid())
+
+  // Basic info
+  make      String   // e.g., "Toyota"
+  model     String   // e.g., "Corolla"
+  year      Int
+  price     Float
+  status    String   @default("AVAILABLE") // AVAILABLE, SOLD, PENDING, INACTIVE
+
+  // Detailed specs (stored as JSON)
+  specifications String? // JSON string with mileage, transmission, fuel, color, condition, features, description
+
+  // Media
+  images    CarImage[]
+
+  // Customer info (for customer-submitted cars - no login needed)
+  customerName  String?   // Name of person selling the car
+  customerPhone String?   // Phone to contact seller
+
+  // Relationships
+  showroomId String?
+  showroom   Showroom? @relation(fields: [showroomId], references: [id], onDelete: SetNull)
+
+  inquiries Inquiry[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([showroomId])
+  @@index([customerPhone])
+  @@map("cars")
+}
+
+// CarImage model - stores car photos
+model CarImage {
+  id        String   @id @default(cuid())
+  carId     String
+  car       Car      @relation(fields: [carId], references: [id], onDelete: Cascade)
+
+  url       String   // Local file path or cloud storage URL
+  order     Int      // Display order
+
+  createdAt DateTime @default(now())
+
+  @@index([carId])
+  @@map("car_images")
+}
+
+// Inquiry model - tracks customer inquiries about cars (phone-based, no login)
+model Inquiry {
+  id        String   @id @default(cuid())
+
+  carId     String
+  car       Car      @relation(fields: [carId], references: [id], onDelete: Cascade)
+
+  // Customer info (no user account needed)
+  customerName  String    // Name of person inquiring
+  customerPhone String    // Phone to contact buyer
+
+  status    String   @default("PENDING") // PENDING, CONTACTED, INTERESTED, NOT_INTERESTED, COMPLETED
+  message   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([carId])
+  @@index([customerPhone])
+  @@map("inquiries")
+}
+
+// Future: Investor model (Phase 2)
+// model Investor {
+//   id        String   @id @default(cuid())
+//   userId    String   @unique
+//   user      User     @relation(fields: [userId], references: [id])
+//
+//   // Portfolio of cars they own (with ownership percentage)
+//   // carInvestments CarInvestment[]
+//
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+// }
+
+// Future: Car investment tracking (Phase 2)
+// model CarInvestment {
+//   id        String   @id @default(cuid())
+//   carId     String
+//   car       Car      @relation(fields: [carId], references: [id])
+//
+//   investorId String
+//   investor   Investor @relation(fields: [investorId], references: [id])
+//
+//   ownershipPercentage Float
+//   investmentAmount    Float
+//   profitLoss          Float?
+//
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+// }
