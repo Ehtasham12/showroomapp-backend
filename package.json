@@ -21,6 +21,7 @@
     "db:seed": "npx tsx prisma/seed.ts"
   },
   "dependencies": {
+    "@flydotio/litestream": "^1.0.1",
     "@nestjs/common": "^10.3.0",
     "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^10.3.0",
@@ -75,5 +76,8 @@
     "ts-loader": "^9.5.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
+  },
+  "dockerfile": {
+    "litestream": true
   }
 }
